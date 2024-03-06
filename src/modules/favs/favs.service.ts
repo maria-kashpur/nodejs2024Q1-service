@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CreateFavDto } from './dto/create-fav.dto';
 import { UpdateFavDto } from './dto/update-fav.dto';
+import { Fav } from './entities/fav.entity';
 
 @Injectable()
 export class FavsService {
+  favs: Fav[] = [];
+
   create(createFavDto: CreateFavDto) {
     return 'This action adds a new fav';
   }

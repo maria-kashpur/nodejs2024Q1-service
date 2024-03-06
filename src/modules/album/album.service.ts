@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
+import { Album } from './entities/album.entity';
 
 @Injectable()
 export class AlbumService {
+  alboms: Album[] = [];
+
   create(createAlbumDto: CreateAlbumDto) {
     return 'This action adds a new album';
   }
