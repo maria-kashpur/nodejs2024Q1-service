@@ -14,7 +14,7 @@ async function bootstrap() {
 
   await app.listen(port);
   console.log(
-    `Server started: http://localhost:${port}/ \nApi documentation:  http://localhost:${port}/doc`,
+    `Server started: ${await app.getUrl()} \nApi documentation:  ${await app.getUrl()}/doc`,
   );
 }
 bootstrap();
