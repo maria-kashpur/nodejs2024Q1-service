@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
+import { Album } from './entities/album.entity';
 
 @Controller('album')
 export class AlbumController {
@@ -13,8 +14,8 @@ export class AlbumController {
   }
 
   @Get()
-  findAll() {
-    return this.albumService.findAll();
+  async findAll(): Promise<Album[]> {
+    return await this.albumService.findAll();
   }
 
   @Get(':id')

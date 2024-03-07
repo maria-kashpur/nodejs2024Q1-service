@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { Track } from './entities/track.entity';
 
 @Controller('track')
 export class TrackController {
@@ -13,8 +14,8 @@ export class TrackController {
   }
 
   @Get()
-  findAll() {
-    return this.trackService.findAll();
+  async findAll(): Promise<Track[]> {
+    return await this.trackService.findAll();
   }
 
   @Get(':id')

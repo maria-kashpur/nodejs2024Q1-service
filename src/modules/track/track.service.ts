@@ -11,8 +11,8 @@ export class TrackService {
     return 'This action adds a new track';
   }
 
-  findAll() {
-    return `This action returns all track`;
+  async findAll(): Promise<Track[]> {
+    return this.tracks;
   }
 
   findOne(id: number) {

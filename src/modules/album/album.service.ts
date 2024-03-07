@@ -11,8 +11,8 @@ export class AlbumService {
     return 'This action adds a new album';
   }
 
-  findAll() {
-    return `This action returns all album`;
+  async findAll(): Promise<Album[]> {
+    return this.alboms;
   }
 
   findOne(id: number) {

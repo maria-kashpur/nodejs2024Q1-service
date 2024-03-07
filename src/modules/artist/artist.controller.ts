@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { Artist } from './entities/artist.entity';
 
 @Controller('artist')
 export class ArtistController {
@@ -13,8 +14,8 @@ export class ArtistController {
   }
 
   @Get()
-  findAll() {
-    return this.artistService.findAll();
+  async findAll(): Promise<Artist[]> {
+    return await this.artistService.findAll();
   }
 
   @Get(':id')

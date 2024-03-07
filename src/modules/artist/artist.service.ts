@@ -6,13 +6,13 @@ import { Artist } from './entities/artist.entity';
 @Injectable()
 export class ArtistService {
   artists: Artist[] = [];
-  
+
   create(createArtistDto: CreateArtistDto) {
     return 'This action adds a new artist';
   }
 
-  findAll() {
-    return `This action returns all artist`;
+  async findAll(): Promise<Artist[]> {
+    return this.artists;
   }
 
   findOne(id: number) {
