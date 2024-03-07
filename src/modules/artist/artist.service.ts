@@ -3,13 +3,19 @@ import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
 import appError from 'src/common/constants/errors';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ArtistService {
   artists: Artist[] = [];
 
-  create(createArtistDto: CreateArtistDto) {
-    return 'This action adds a new artist';
+  async create(createArtistDto: CreateArtistDto): Promise<Artist>  {
+    const artist: Artist = {
+      id: uuidv4(),
+      ...createArtistDto
+    };
+    this.artists.push(artist)
+    return artist;
   }
 
   async findAll(): Promise<Artist[]> {
@@ -24,11 +30,20 @@ export class ArtistService {
     return searchArtist;
   }
 
-  async update(id: string, updateArtistDto: UpdateArtistDto) {
-    return `This action updates a #${id} artist`;
+  async update(id: string, updateArtistDto: UpdateArtistDto): Promise<Artist> {
+    const artist = await this.findOne(id)
+    const updatedArtist = {
+      ...artist,
+      updateArtistDto
+    }
+
+    this.artists = this.artists.map(artist => artist.id === id ? updatedArtist : artist);
+
+    return updatedArtist;
   }
 
-  async remove(id: string) {
-    return `This action removes a #${id} artist`;
+  async remove(id: string): Promise<void> {
+    const artist = await this.findOne(id);
+    this.artists = this.artists.filter((artist) => artist.id !== id)
   }
 }
