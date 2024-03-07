@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
+import appError from 'src/common/constants/errors';
 
 @Injectable()
 export class AlbumService {
@@ -15,15 +16,19 @@ export class AlbumService {
     return this.alboms;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} album`;
+  async findOne(id: string): Promise<Album> {
+    const searchAlbum = this.alboms.find((albom) => albom.id === id);
+    if (!searchAlbum) {
+      throw new NotFoundException(appError.ALBUM_ID_NOT_EXIST);
+    }
+    return searchAlbum;
   }
 
-  update(id: number, updateAlbumDto: UpdateAlbumDto) {
+  async update(id: string, updateAlbumDto: UpdateAlbumDto) {
     return `This action updates a #${id} album`;
   }
 
-  remove(id: number) {
+  async remove(id: string) {
     return `This action removes a #${id} album`;
   }
 }

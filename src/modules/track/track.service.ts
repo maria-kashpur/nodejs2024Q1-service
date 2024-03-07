@@ -1,11 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
+import appError from 'src/common/constants/errors';
 
 @Injectable()
 export class TrackService {
-  tracks: Track[] = []
+  tracks: Track[] = [];
 
   create(createTrackDto: CreateTrackDto) {
     return 'This action adds a new track';
@@ -15,15 +16,19 @@ export class TrackService {
     return this.tracks;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} track`;
+  async findOne(id: string): Promise<Track> {
+    const searchTrack = this.tracks.find((track) => track.id === id);
+    if (!searchTrack) {
+      throw new NotFoundException(appError.TRACK_ID_NOT_EXIST);
+    }
+    return searchTrack;
   }
 
-  update(id: number, updateTrackDto: UpdateTrackDto) {
+  async update(id: string, updateTrackDto: UpdateTrackDto) {
     return `This action updates a #${id} track`;
   }
 
-  remove(id: number) {
+  async remove(id: string) {
     return `This action removes a #${id} track`;
   }
 }
