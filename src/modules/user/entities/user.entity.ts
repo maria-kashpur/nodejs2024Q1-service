@@ -5,9 +5,9 @@ export class User {
 
   password: string;
 
-  version: number; 
+  version: number;
 
   createdAt: number;
-  
+
   updatedAt: number;
 }

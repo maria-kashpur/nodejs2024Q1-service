@@ -1,17 +1,21 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import appError from 'src/common/constants/errors';
 import { v4 as uuidv4 } from 'uuid';
 import { error } from 'console';
+import db from 'src/db';
 
 @Injectable()
 export class UserService {
-  users: User[] = [];
-
   async getUserByID(id: string): Promise<User> {
-    const searchUser = this.users.find((user) => user.id === id);
+    const searchUser = db.users.find((user) => user.id === id);
     if (!searchUser) {
       throw new NotFoundException(appError.USER_ID_NOT_EXIST);
     }
@@ -26,7 +30,7 @@ export class UserService {
       createdAt: +new Date(),
       updatedAt: +new Date(),
     };
-    this.users.push(user);
+    db.users.push(user);
 
     const response = {
       id: user.id,
@@ -39,8 +43,8 @@ export class UserService {
   }
 
   async findAll(): Promise<Omit<User, 'password'>[]> {
-    const users = this.users;
-    const response = this.users.map((user) => {
+    const users = db.users;
+    const response = db.users.map((user) => {
       delete user.password;
       return user;
     });
@@ -69,7 +73,7 @@ export class UserService {
       updatedAt: +new Date(),
     };
 
-    this.users = this.users.map((user) =>
+    db.users = db.users.map((user) =>
       user.id === id ? updatedUser : user,
     );
 
@@ -79,6 +83,6 @@ export class UserService {
 
   async remove(id: string): Promise<void> {
     const searchUser = await this.getUserByID(id);
-    this.users = this.users.filter((user) => user.id !== id);
+    db.users = db.users.filter((user) => user.id !== id);
   }
 }

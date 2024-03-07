@@ -1,34 +1,52 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Delete,
+  ParseUUIDPipe,
+  HttpCode,
+  ValidationPipe,
+  BadRequestException,
+} from '@nestjs/common';
 import { FavsService } from './favs.service';
-import { CreateFavDto } from './dto/create-fav.dto';
-import { UpdateFavDto } from './dto/update-fav.dto';
+import { Artist } from '../artist/entities/artist.entity';
+import { Album } from '../album/entities/album.entity';
+import { Track } from '../track/entities/track.entity';
+import { FavResponse } from './entities/fav.entity';
+import appError from 'src/common/constants/errors';
 
 @Controller('favs')
 export class FavsController {
   constructor(private readonly favsService: FavsService) {}
 
-  @Post()
-  create(@Body() createFavDto: CreateFavDto) {
-    return this.favsService.create(createFavDto);
+  @Post('/:source/:id')
+  async create(
+    @Param('source') source: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<Artist | Album | Track> {
+     if (source === 'artist' || source === 'album' || source === 'track') {
+      return await this.favsService.create(source, id);
+     } else {
+      throw new BadRequestException(appError.INVALID_SOURSE);
+     }
   }
 
   @Get()
-  findAll() {
-    return this.favsService.findAll();
+  async findAll(): Promise<FavResponse> {
+    return await this.favsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.favsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFavDto: UpdateFavDto) {
-    return this.favsService.update(+id, updateFavDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.favsService.remove(+id);
+  @HttpCode(204)
+  @Delete('/:source/:id')
+  async remove(
+    @Param('source') source: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<void> {
+    if (source === 'artist' || source === 'album' || source === 'track') {
+      return await this.favsService.remove(source, id);
+    } else {
+      throw new BadRequestException(appError.INVALID_SOURSE);
+    }
   }
 }

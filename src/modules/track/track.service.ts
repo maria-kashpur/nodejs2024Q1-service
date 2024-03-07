@@ -4,27 +4,29 @@ import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
 import appError from 'src/common/constants/errors';
 import { v4 as uuidv4 } from 'uuid';
+import db from 'src/db';
 
 @Injectable()
 export class TrackService {
-  tracks: Track[] = [];
-
   async create(createTrackDto: CreateTrackDto): Promise<Track> {
-    // validate createTrackDto
     const track: Track = {
       id: uuidv4(),
       ...createTrackDto,
     };
-    this.tracks.push(track);
+    db.tracks.push(track);
     return track;
   }
 
+  async findMany(ids: string[]): Promise<Track[]> {
+    return db.tracks.filter((track) => ids.includes(track.id));
+  }
+
   async findAll(): Promise<Track[]> {
-    return this.tracks;
+    return db.tracks;
   }
 
   async findOne(id: string): Promise<Track> {
-    const searchTrack = this.tracks.find((track) => track.id === id);
+    const searchTrack = db.tracks.find((track) => track.id === id);
     if (!searchTrack) {
       throw new NotFoundException(appError.TRACK_ID_NOT_EXIST);
     }
@@ -36,15 +38,17 @@ export class TrackService {
     const updatedTrack: Track = {
       ...track,
       ...updateTrackDto,
-    }
+    };
 
-    this.tracks = this.tracks.map(track => track.id === id ? updatedTrack: track)
+    db.tracks = db.tracks.map((track) =>
+      track.id === id ? updatedTrack : track,
+    );
 
     return updatedTrack;
   }
 
   async remove(id: string): Promise<void> {
-    const track = this.findOne(id);
-    this.tracks = this.tracks.filter((track) => track.id !== id)
+    const track = await this.findOne(id);
+    db.tracks = db.tracks.filter((track) => track.id !== id);
   }
 }
