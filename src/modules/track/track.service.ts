@@ -3,13 +3,20 @@ import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
 import appError from 'src/common/constants/errors';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class TrackService {
   tracks: Track[] = [];
 
-  create(createTrackDto: CreateTrackDto) {
-    return 'This action adds a new track';
+  async create(createTrackDto: CreateTrackDto): Promise<Track> {
+    // validate createTrackDto
+    const track: Track = {
+      id: uuidv4(),
+      ...createTrackDto,
+    };
+    this.tracks.push(track);
+    return track;
   }
 
   async findAll(): Promise<Track[]> {
@@ -24,11 +31,20 @@ export class TrackService {
     return searchTrack;
   }
 
-  async update(id: string, updateTrackDto: UpdateTrackDto) {
-    return `This action updates a #${id} track`;
+  async update(id: string, updateTrackDto: UpdateTrackDto): Promise<Track> {
+    const track = await this.findOne(id);
+    const updatedTrack: Track = {
+      ...track,
+      ...updateTrackDto,
+    }
+
+    this.tracks = this.tracks.map(track => track.id === id ? updatedTrack: track)
+
+    return updatedTrack;
   }
 
-  async remove(id: string) {
-    return `This action removes a #${id} track`;
+  async remove(id: string): Promise<void> {
+    const track = this.findOne(id);
+    this.tracks = this.tracks.filter((track) => track.id !== id)
   }
 }
