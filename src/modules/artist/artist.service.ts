@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
@@ -50,5 +50,14 @@ export class ArtistService {
   async remove(id: string): Promise<void> {
     await this.findOne(id);
     db.artists = db.artists.filter((artist) => artist.id !== id);
+    await this.removeFavorites(id);
+  }
+
+  async removeFavorites(id: string): Promise<void> {
+    const artistIndex = db.favs.artistIds.indexOf(id);
+    if (artistIndex === -1) {
+      throw new BadRequestException(appError.NOT_FOUND_FAVS_ARTIST);
+    }
+    db.favs.artistIds.splice(artistIndex, 1);
   }
 }

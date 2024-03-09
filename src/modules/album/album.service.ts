@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
@@ -12,7 +12,7 @@ export class AlbumService {
     const album: Album = {
       id: uuidv4(),
       ...createAlbumDto,
-    }; 
+    };
 
     db.albums.push(album);
 
@@ -50,5 +50,14 @@ export class AlbumService {
   async remove(id: string): Promise<void> {
     await this.findOne(id);
     db.albums = db.albums.filter((album) => album.id !== id);
+    await this.removeFavorites(id)
+  }
+
+  async removeFavorites(id: string): Promise<void> {
+    const albumIndex = db.favs.albumIds.indexOf(id);
+    if (albumIndex === -1) {
+      throw new BadRequestException(appError.NOT_FOUND_FAVS_ALBUM);
+    }
+    db.favs.albumIds.splice(albumIndex, 1);
   }
 }

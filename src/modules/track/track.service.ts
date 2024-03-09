@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
@@ -50,5 +50,14 @@ export class TrackService {
   async remove(id: string): Promise<void> {
     const track = await this.findOne(id);
     db.tracks = db.tracks.filter((track) => track.id !== id);
+    await this.removeFavorites(id)
+  }
+
+  async removeFavorites(id: string): Promise<void> {
+    const trackIndex = db.favs.trackIds.indexOf(id);
+    if (trackIndex === -1) {
+      throw new BadRequestException(appError.NOT_FOUND_FAVS_TRACK);
+    }
+    db.favs.trackIds.splice(trackIndex, 1);
   }
 }

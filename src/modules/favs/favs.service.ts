@@ -14,7 +14,7 @@ export class FavsService {
   constructor(
     private readonly artistService: ArtistService,
     private readonly albumService: AlbumService,
-    private readonly trackSerrvice: TrackService,
+    private readonly trackService: TrackService,
   ) {}
 
   async create(
@@ -55,7 +55,7 @@ export class FavsService {
         let track: Track;
 
         try {
-          track = await this.trackSerrvice.findOne(id);
+          track = await this.trackService.findOne(id);
         } catch (e) {
           throw new UnprocessableEntityException(appError.TRACK_ID_NOT_EXIST);
         }
@@ -75,37 +75,24 @@ export class FavsService {
     const response: FavResponse = {
       artists: await this.artistService.findMany(artistIds),
       albums: await this.albumService.findMany(albumIds),
-      tracks: await this.trackSerrvice.findMany(trackIds),
+      tracks: await this.trackService.findMany(trackIds),
     };
     return response;
   }
 
   async remove(source: 'artist' | 'album' | 'track', id: string): Promise<void> {
-    const { artistIds, albumIds, trackIds } = db.favs;
     switch (source) {
       case "artist":
-        const artistIndex = db.favs.artistIds.indexOf(id);
-        if (artistIndex === -1) {
-          throw new BadRequestException(appError.NOT_FOUND_FAVS_ARTIST);
-        }
-        db.favs.artistIds.splice(artistIndex, 1);
+        await this.artistService.removeFavorites(id);
         break;
       
       case "album":
-        const albumIndex = db.favs.albumIds.indexOf(id);
-        if (albumIndex === -1) {
-          throw new BadRequestException(appError.NOT_FOUND_FAVS_ALBUM);
-        }
-        db.favs.albumIds.splice(albumIndex, 1);
+        await this.albumService.removeFavorites(id);
         break;
       
       case "track": 
-        const trackIndex = db.favs.trackIds.indexOf(id);
-        if (trackIndex === -1) {
-          throw new BadRequestException(appError.NOT_FOUND_FAVS_TRACK);
-        }
-        db.favs.trackIds.splice(trackIndex, 1);
-      break
+        await this.trackService.removeFavorites(id);
+        break
     
       default:
         throw new Error('Invalid source');
