@@ -8,9 +8,12 @@ import { AlbumModule } from '../album/album.module';
 import { FavsModule } from '../favs/favs.module';
 import { ConfigModule } from '@nestjs/config';
 import configurations from '../../configurations';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { DeleteSourceListener } from 'src/common/listeners/delete-source.listener';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configurations],
@@ -20,8 +23,9 @@ import configurations from '../../configurations';
     ArtistModule,
     AlbumModule,
     FavsModule,
+    EventEmitterModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, DeleteSourceListener],
 })
 export class AppModule {}

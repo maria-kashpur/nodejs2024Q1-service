@@ -1,13 +1,20 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
 import appError from 'src/common/constants/errors';
 import { v4 as uuidv4 } from 'uuid';
 import db from 'src/db';
+import { EventEmitter2 } from 'eventemitter2';
 
 @Injectable()
 export class TrackService {
+  constructor(private eventEmitter: EventEmitter2) {}
+
   async create(createTrackDto: CreateTrackDto): Promise<Track> {
     const track: Track = {
       id: uuidv4(),
@@ -50,14 +57,24 @@ export class TrackService {
   async remove(id: string): Promise<void> {
     const track = await this.findOne(id);
     db.tracks = db.tracks.filter((track) => track.id !== id);
-    await this.removeFavorites(id)
+    await this.eventEmitter.emitAsync('remove.track', id);
   }
 
-  async removeFavorites(id: string): Promise<void> {
-    const trackIndex = db.favs.trackIds.indexOf(id);
-    if (trackIndex === -1) {
-      throw new BadRequestException(appError.NOT_FOUND_FAVS_TRACK);
-    }
-    db.favs.trackIds.splice(trackIndex, 1);
+  async removeArtistId(artistId: string): Promise<void> {
+    db.tracks = db.tracks.map((track) => {
+      if (track.artistId === artistId) {
+        track.artistId = null;
+      }
+      return track;
+    });
+  }
+
+  async removeAlbumId(albumId: string): Promise<void> {
+    db.tracks = db.tracks.map((track) => {
+      if (track.albumId === albumId) {
+        track.albumId = null;
+      }
+      return track;
+    });
   }
 }

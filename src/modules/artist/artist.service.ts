@@ -5,13 +5,16 @@ import { Artist } from './entities/artist.entity';
 import appError from 'src/common/constants/errors';
 import { v4 as uuidv4 } from 'uuid';
 import db from 'src/db';
+import { EventEmitter2 } from 'eventemitter2';
 
 @Injectable()
 export class ArtistService {
-  async create(createArtistDto: CreateArtistDto): Promise<Artist> {
+  constructor(private eventEmitter: EventEmitter2) {}
+
+  async create(dto: CreateArtistDto): Promise<Artist> {
     const artist: Artist = {
       id: uuidv4(),
-      ...createArtistDto,
+      ...dto,
     };
     db.artists.push(artist);
     return artist;
@@ -33,11 +36,11 @@ export class ArtistService {
     return searchArtist;
   }
 
-  async update(id: string, updateArtistDto: UpdateArtistDto): Promise<Artist> {
+  async update(id: string, dto: UpdateArtistDto): Promise<Artist> {
     const artist = await this.findOne(id);
     const updatedArtist: Artist = {
       ...artist,
-      ...updateArtistDto,
+      ...dto,
     };
 
     db.artists = db.artists.map((artist) =>
@@ -50,14 +53,6 @@ export class ArtistService {
   async remove(id: string): Promise<void> {
     await this.findOne(id);
     db.artists = db.artists.filter((artist) => artist.id !== id);
-    await this.removeFavorites(id);
-  }
-
-  async removeFavorites(id: string): Promise<void> {
-    const artistIndex = db.favs.artistIds.indexOf(id);
-    if (artistIndex === -1) {
-      throw new BadRequestException(appError.NOT_FOUND_FAVS_ARTIST);
-    }
-    db.favs.artistIds.splice(artistIndex, 1);
+    await this.eventEmitter.emitAsync('remove.artist', id);
   }
 }

@@ -19,8 +19,8 @@ export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Post()
-  async create(@Body() createAlbumDto: CreateAlbumDto) {
-    return await this.albumService.create(createAlbumDto);
+  async create(@Body() dto: CreateAlbumDto): Promise<Album> {
+    return await this.albumService.create(dto);
   }
 
   @Get()
@@ -36,9 +36,9 @@ export class AlbumController {
   @Put(':id')
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() updateAlbumDto: UpdateAlbumDto,
+    @Body() dto: UpdateAlbumDto,
   ): Promise<Album> {
-    return await this.albumService.update(id, updateAlbumDto);
+    return await this.albumService.update(id, dto);
   }
 
   @Delete(':id')
