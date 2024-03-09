@@ -1,5 +1,4 @@
 import {
-  IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -11,12 +10,7 @@ export class CreateAlbumDto {
   @IsNotEmpty()
   name: string;
 
-  @IsBoolean()
-  @IsOptional()
-  grammy: boolean;
-
   @IsNumber()
-  @IsOptional()
   year: number;
 
   @IsString()

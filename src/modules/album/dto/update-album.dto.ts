@@ -5,12 +5,7 @@ export class UpdateAlbumDto {
   @IsOptional()
   name: string;
 
-  @IsBoolean()
-  @IsOptional()
-  grammy: boolean;
-
   @IsNumber()
-  @IsOptional()
   year: number;
 
   @IsString()
