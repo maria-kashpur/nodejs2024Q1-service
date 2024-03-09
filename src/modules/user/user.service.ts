@@ -1,7 +1,6 @@
 import {
   ForbiddenException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -9,7 +8,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import appError from 'src/common/constants/errors';
 import { v4 as uuidv4 } from 'uuid';
-import { error } from 'console';
 import db from 'src/db';
 
 @Injectable()
@@ -43,12 +41,10 @@ export class UserService {
   }
 
   async findAll(): Promise<Omit<User, 'password'>[]> {
-    const users = db.users;
-    const response = db.users.map((user) => {
+    return db.users.map((user) => {
       delete user.password;
       return user;
     });
-    return response;
   }
 
   async findOne(id: string): Promise<Omit<User, 'password'>> {
@@ -73,16 +69,14 @@ export class UserService {
       updatedAt: +new Date(),
     };
 
-    db.users = db.users.map((user) =>
-      user.id === id ? updatedUser : user,
-    );
+    db.users = db.users.map((user) => (user.id === id ? updatedUser : user));
 
     const response = await this.findOne(id);
     return response;
   }
 
   async remove(id: string): Promise<void> {
-    const searchUser = await this.getUserByID(id);
+    await this.getUserByID(id);
     db.users = db.users.filter((user) => user.id !== id);
   }
 }

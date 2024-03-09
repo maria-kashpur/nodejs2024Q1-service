@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
@@ -55,7 +51,7 @@ export class TrackService {
   }
 
   async remove(id: string): Promise<void> {
-    const track = await this.findOne(id);
+    await this.findOne(id);
     db.tracks = db.tracks.filter((track) => track.id !== id);
     await this.eventEmitter.emitAsync('remove.track', id);
   }

@@ -6,7 +6,6 @@ import {
   Delete,
   ParseUUIDPipe,
   HttpCode,
-  ValidationPipe,
   BadRequestException,
 } from '@nestjs/common';
 import { FavsService } from './favs.service';
@@ -25,11 +24,11 @@ export class FavsController {
     @Param('source') source: string,
     @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<Artist | Album | Track> {
-     if (source === 'artist' || source === 'album' || source === 'track') {
+    if (source === 'artist' || source === 'album' || source === 'track') {
       return await this.favsService.create(source, id);
-     } else {
+    } else {
       throw new BadRequestException(appError.INVALID_SOURSE);
-     }
+    }
   }
 
   @Get()
