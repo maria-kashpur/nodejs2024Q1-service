@@ -20,6 +20,10 @@ export class UserService {
     return searchUser;
   }
 
+  async getUserByLogin(login: User['login']): Promise<User | null> {
+    return db.users.find((user) => user.login === login);
+  }
+
   async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
     const user: User = {
       id: uuidv4(),

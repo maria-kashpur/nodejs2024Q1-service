@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import configurations from '../../configurations';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { DeleteSourceListener } from 'src/common/listeners/delete-source.listener';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { DeleteSourceListener } from 'src/common/listeners/delete-source.listene
     AlbumModule,
     FavsModule,
     EventEmitterModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService, DeleteSourceListener],

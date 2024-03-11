@@ -1,4 +1,10 @@
 const appError = {
+  INVALID_TOKEN: 'Invalid token',
+  REFRESH_TOKEN_NOT_FOUND: 'Refresh token is not found',
+  REFRESH_TOKEN_EXP: 'Refresh token is expired',
+  WRONG_DATA: 'Wrong data',
+  USER_NOT_EXIST: 'User not found',
+  USER_EXIST: 'User with this login exist',
   USER_ID_NOT_EXIST: 'User with this id not exist',
   TRACK_ID_NOT_EXIST: 'Track with this id not exist',
   ALBUM_ID_NOT_EXIST: 'Album with this id not exist',
