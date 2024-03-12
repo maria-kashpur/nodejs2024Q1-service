@@ -1,0 +1,10 @@
+dist/
+node_modules/
+npm-debug.log
+Dockerfile
+.git
+.cache
+.idea
+.gitignore
+.dockerignore
+.DS_Store
