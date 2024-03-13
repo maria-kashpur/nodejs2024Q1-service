@@ -6,30 +6,31 @@ import appError from 'src/common/constants/errors';
 import { v4 as uuidv4 } from 'uuid';
 import db from 'src/db';
 import { EventEmitter2 } from 'eventemitter2';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class ArtistService {
-  constructor(private eventEmitter: EventEmitter2) {}
+  constructor(
+    private eventEmitter: EventEmitter2,
+    @InjectRepository(Artist)
+    private readonly artistRepository: Repository<Artist>,
+  ) {}
 
   async create(dto: CreateArtistDto): Promise<Artist> {
-    const artist: Artist = {
-      id: uuidv4(),
-      ...dto,
-    };
-    db.artists.push(artist);
-    return artist;
+    return await this.artistRepository.save(dto);
   }
 
   async findAll(): Promise<Artist[]> {
-    return db.artists;
+    return await this.artistRepository.find()
   }
 
   async findMany(ids: string[]): Promise<Artist[]> {
-    return db.artists.filter((artist) => ids.includes(artist.id));
+    return await this.artistRepository.find({ where: { id: In(ids) } });
   }
 
   async findOne(id: string): Promise<Artist> {
-    const searchArtist = db.artists.find((artist) => artist.id === id);
+    const searchArtist = await this.artistRepository.findOneBy({id});
     if (!searchArtist) {
       throw new NotFoundException(appError.ARTIST_ID_NOT_EXIST);
     }
@@ -43,16 +44,14 @@ export class ArtistService {
       ...dto,
     };
 
-    db.artists = db.artists.map((artist) =>
-      artist.id === id ? updatedArtist : artist,
-    );
+    await this.artistRepository.save(updatedArtist);
 
-    return updatedArtist;
+    return await this.findOne(id);
   }
 
   async remove(id: string): Promise<void> {
     await this.findOne(id);
-    db.artists = db.artists.filter((artist) => artist.id !== id);
-    await this.eventEmitter.emitAsync('remove.artist', id);
+    await this.artistRepository.delete(id)
+    //await this.eventEmitter.emitAsync('remove.artist', id);
   }
 }
