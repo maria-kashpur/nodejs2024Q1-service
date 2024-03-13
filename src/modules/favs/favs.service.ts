@@ -3,7 +3,7 @@ import {
   Injectable,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { FavResponse } from './entities/fav.entity';
+import { Favorite } from './entities/fav.entity';
 import { ArtistService } from '../artist/artist.service';
 import { AlbumService } from '../album/album.service';
 import { TrackService } from '../track/track.service';
@@ -11,86 +11,93 @@ import { Artist } from '../artist/entities/artist.entity';
 import { Album } from '../album/entities/album.entity';
 import { Track } from '../track/entities/track.entity';
 import appError from 'src/common/constants/errors';
-import db from 'src/db';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+class Favorites {
+  artists: Artist[];
+  albums: Album[];
+  tracks: Track[];
+}
 
 @Injectable()
 export class FavsService {
   constructor(
+    @InjectRepository(Favorite)
+    private readonly favoritesRepository: Repository<Favorite>,
     private readonly artistService: ArtistService,
     private readonly albumService: AlbumService,
     private readonly trackService: TrackService,
   ) {}
 
-  async addArtist(id: string): Promise<Artist> {
-    const { artistIds } = db.favs;
-    let artist: Artist;
-
-    try {
-      artist = await this.artistService.findOne(id);
-    } catch (e) {
-      throw new UnprocessableEntityException(appError.ARTIST_ID_NOT_EXIST);
+  private async getService(source: Favorite['source']) {
+    switch (source) {
+      case 'album':
+        return this.albumService;
+      case 'artist':
+        return this.artistService;
+      case 'track':
+        return this.trackService;
+      default:
+        throw new Error('Service is not found');
     }
-
-    if (!artistIds.includes(id)) {
-      artistIds.push(id);
-    }
-    return artist;
   }
 
-  async addAlbum(id: string): Promise<Album> {
-    const { albumIds } = db.favs;
-    let album: Album;
-
-    try {
-      album = await this.albumService.findOne(id);
-    } catch (e) {
-      throw new UnprocessableEntityException(appError.ALBUM_ID_NOT_EXIST);
-    }
-
-    if (!albumIds.includes(id)) {
-      albumIds.push(id);
-    }
-    return album;
+  private async getIdsBySource(
+    source: Favorite['source'],
+  ): Promise<Favorite['sourceId'][]> {
+    const sourceIds: { sourceId: string }[] = await this.favoritesRepository
+      .createQueryBuilder('favorites')
+      .select('favorites."sourceId"')
+      .where('favorites."source" = :source', { source })
+      .getRawMany();
+    return sourceIds.map((el) => el.sourceId);
   }
 
-  async addTrack(id: string): Promise<Track> {
-    const { trackIds } = db.favs;
-    let track: Track;
-
-    try {
-      track = await this.trackService.findOne(id);
-    } catch (e) {
-      throw new UnprocessableEntityException(appError.TRACK_ID_NOT_EXIST);
-    }
-
-    if (!trackIds.includes(id)) {
-      trackIds.push(id);
-    }
-    return track;
+  private async getFavorite(
+    source: Favorite['source'],
+    sourceId: Favorite['sourceId'],
+  ): Promise<Favorite | null> {
+    return await this.favoritesRepository.findOneBy({ source, sourceId });
   }
 
   async create(
-    source: 'artist' | 'album' | 'track',
-    id: string,
+    source: Favorite['source'],
+    sourceId: Favorite['sourceId'],
   ): Promise<Artist | Album | Track> {
-    switch (source) {
-      case 'artist':
-        return await this.addArtist(id);
+    const service = await this.getService(source);
+    let sourceElement: Track | Album | Artist | null = null;
 
-      case 'album':
-        return await this.addAlbum(id);
-
-      case 'track':
-        return await this.addTrack(id);
-
-      default:
-        throw new Error('Invalid source');
+    try {
+      sourceElement = await service.findOne(sourceId);
+    } catch (e) {
+      switch (source) {
+        case 'album':
+          throw new UnprocessableEntityException(appError.ALBUM_ID_NOT_EXIST);
+        case 'track':
+          throw new UnprocessableEntityException(appError.TRACK_ID_NOT_EXIST);
+        case 'artist':
+          throw new UnprocessableEntityException(appError.ARTIST_ID_NOT_EXIST);
+        default:
+          throw new Error();
+      }
     }
+
+    const isFav = await this.getFavorite(source, sourceId);
+    if (!isFav) {
+      const dto = { source, sourceId };
+      await this.favoritesRepository.save(dto);
+    }
+
+    return sourceElement;
   }
 
-  async findAll(): Promise<FavResponse> {
-    const { artistIds, albumIds, trackIds } = db.favs;
-    const response: FavResponse = {
+  async findAll(): Promise<Favorites> {
+    const artistIds = await this.getIdsBySource('artist');
+    const albumIds = await this.getIdsBySource('album');
+    const trackIds = await this.getIdsBySource('track');
+    console.log(artistIds);
+    const response: Favorites = {
       artists: await this.artistService.findMany(artistIds),
       albums: await this.albumService.findMany(albumIds),
       tracks: await this.trackService.findMany(trackIds),
@@ -98,49 +105,20 @@ export class FavsService {
     return response;
   }
 
-  private async removeArtist(id: string) {
-    const artistIndex = db.favs.artistIds.indexOf(id);
-    if (artistIndex === -1) {
-      throw new BadRequestException(appError.NOT_FOUND_FAVS_ARTIST);
+  async remove(source: Favorite['source'], sourceId: string): Promise<void> {
+    const fav = await this.getFavorite(source, sourceId);
+    if (!fav) {
+      switch (source) {
+        case 'album':
+          throw new BadRequestException(appError.NOT_FOUND_FAVS_ALBUM);
+        case 'artist':
+          throw new BadRequestException(appError.NOT_FOUND_FAVS_ARTIST);
+        case 'track':
+          throw new BadRequestException(appError.NOT_FOUND_FAVS_TRACK);
+        default:
+          throw new Error();
+      }
     }
-    db.favs.artistIds.splice(artistIndex, 1);
-  }
-
-  private async removeAlbum(id: string): Promise<void> {
-    const albumIndex = db.favs.albumIds.indexOf(id);
-    if (albumIndex === -1) {
-      throw new BadRequestException(appError.NOT_FOUND_FAVS_ALBUM);
-    }
-    db.favs.albumIds.splice(albumIndex, 1);
-  }
-
-  private async removeTrack(id: string): Promise<void> {
-    const trackIndex = db.favs.trackIds.indexOf(id);
-    if (trackIndex === -1) {
-      throw new BadRequestException(appError.NOT_FOUND_FAVS_TRACK);
-    }
-    db.favs.trackIds.splice(trackIndex, 1);
-  }
-
-  async remove(
-    source: 'artist' | 'album' | 'track',
-    id: string,
-  ): Promise<void> {
-    switch (source) {
-      case 'artist':
-        await this.removeArtist(id);
-        break;
-
-      case 'album':
-        await this.removeAlbum(id);
-        break;
-
-      case 'track':
-        await this.removeTrack(id);
-        break;
-
-      default:
-        throw new Error('Invalid source');
-    }
+    await this.favoritesRepository.delete(fav.id);
   }
 }

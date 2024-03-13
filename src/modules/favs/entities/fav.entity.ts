@@ -1,15 +1,16 @@
-import { Album } from 'src/modules/album/entities/album.entity';
-import { Artist } from 'src/modules/artist/entities/artist.entity';
-import { Track } from 'src/modules/track/entities/track.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-export class Fav {
-  artistIds: string[]; // favorite artists ids
-  albumIds: string[]; // favorite albums ids
-  trackIds: string[]; // favorite tracks ids
-}
+@Entity('Favorite')
+export class Favorite {
+  @PrimaryGeneratedColumn('uuid')
+  id: number;
 
-export class FavResponse {
-  artists: Artist[];
-  albums: Album[];
-  tracks: Track[];
+  @Column({
+    type: 'enum',
+    enum: ['artist', 'album', 'track'],
+  })
+  source: 'artist' | 'album' | 'track';
+
+  @Column()
+  sourceId: string;
 }
