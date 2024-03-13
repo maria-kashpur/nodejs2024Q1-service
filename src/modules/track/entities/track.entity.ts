@@ -22,6 +22,6 @@ export class Track {
   @ManyToOne(() => Artist, { onDelete: 'SET NULL' })
   artist: Artist;
 
-  // @ManyToOne(() => Album, { onDelete: 'SET NULL' })
-  // album: Album;
+  @ManyToOne(() => Album, { onDelete: 'SET NULL' })
+  album: Album;
 }

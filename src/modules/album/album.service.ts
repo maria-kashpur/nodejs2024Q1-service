@@ -6,32 +6,31 @@ import appError from 'src/common/constants/errors';
 import { v4 as uuidv4 } from 'uuid';
 import db from 'src/db';
 import { EventEmitter2 } from 'eventemitter2';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class AlbumService {
-  constructor(private eventEmitter: EventEmitter2) {}
+  constructor(
+    private eventEmitter: EventEmitter2,
+    @InjectRepository(Album)
+    private readonly albumRepository: Repository<Album>,
+  ) {}
 
   async create(dto: CreateAlbumDto): Promise<Album> {
-    const album: Album = {
-      id: uuidv4(),
-      ...dto,
-    };
-
-    db.albums.push(album);
-
-    return album;
+    return await this.albumRepository.save(dto);
   }
 
   async findAll(): Promise<Album[]> {
-    return db.albums;
+    return await this.albumRepository.find()
   }
 
   async findMany(ids: string[]): Promise<Album[]> {
-    return db.albums.filter((album) => ids.includes(album.id));
+    return await this.albumRepository.find({ where: { id: In(ids) } });
   }
 
   async findOne(id: string): Promise<Album> {
-    const searchAlbum = db.albums.find((album) => album.id === id);
+    const searchAlbum = await this.albumRepository.findOneBy({ id });;
     if (!searchAlbum) {
       throw new NotFoundException(appError.ALBUM_ID_NOT_EXIST);
     }
@@ -44,24 +43,24 @@ export class AlbumService {
       ...album,
       ...dto,
     };
-    db.albums = db.albums.map((album) =>
-      album.id === id ? updatedAlbum : album,
-    );
-    return updatedAlbum;
+    
+    await this.albumRepository.save(updatedAlbum);
+
+    return await this.findOne(id);;
   }
 
   async remove(id: string): Promise<void> {
     await this.findOne(id);
-    db.albums = db.albums.filter((album) => album.id !== id);
-    await this.eventEmitter.emitAsync('remove.album', id);
+    await this.albumRepository.delete(id)
+    // await this.eventEmitter.emitAsync('remove.album', id);
   }
 
-  async removeArtistId(artistId: string): Promise<void> {
-    db.albums = db.albums.map((album) => {
-      if (album.artistId === artistId) {
-        album.artistId = null;
-      }
-      return album;
-    });
-  }
+  // async removeArtistId(artistId: string): Promise<void> {
+  //   db.albums = db.albums.map((album) => {
+  //     if (album.artistId === artistId) {
+  //       album.artistId = null;
+  //     }
+  //     return album;
+  //   });
+  // }
 }

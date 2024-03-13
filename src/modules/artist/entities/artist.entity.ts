@@ -12,6 +12,6 @@ export class Artist {
   @Column({ default: false })
   grammy: boolean;
 
-  // @OneToMany(() => Album, (album) => album.artistId)
-  // albums: Album;
+  @OneToMany(() => Album, (album) => album.artistId)
+  albums: Album;
 }
