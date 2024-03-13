@@ -6,13 +6,10 @@ import { AlbumModule } from '../album/album.module';
 import { FavsModule } from '../favs/favs.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configurations from '../../configurations';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { DeleteSourceListener } from 'src/common/listeners/delete-source.listener';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
-    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configurations],
@@ -41,8 +38,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     ArtistModule,
     AlbumModule,
     FavsModule,
-    EventEmitterModule,
   ],
-  providers: [DeleteSourceListener],
 })
 export class AppModule {}

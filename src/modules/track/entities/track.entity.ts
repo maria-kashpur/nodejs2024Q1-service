@@ -1,6 +1,6 @@
-import { Album } from "src/modules/album/entities/album.entity";
-import { Artist } from "src/modules/artist/entities/artist.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Album } from 'src/modules/album/entities/album.entity';
+import { Artist } from 'src/modules/artist/entities/artist.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('Track')
 export class Track {

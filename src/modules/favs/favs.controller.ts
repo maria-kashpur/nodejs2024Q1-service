@@ -12,8 +12,9 @@ import { FavsService } from './favs.service';
 import { Artist } from '../artist/entities/artist.entity';
 import { Album } from '../album/entities/album.entity';
 import { Track } from '../track/entities/track.entity';
-import { FavResponse } from './entities/fav.entity';
+
 import appError from 'src/common/constants/errors';
+import { Favorites } from './entities/fav.entity';
 
 @Controller('favs')
 export class FavsController {
@@ -32,7 +33,7 @@ export class FavsController {
   }
 
   @Get()
-  async findAll(): Promise<FavResponse> {
+  async findAll(): Promise<Favorites> {
     return await this.favsService.findAll();
   }
 

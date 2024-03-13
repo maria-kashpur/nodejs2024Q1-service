@@ -1,5 +1,5 @@
-import { Artist } from "src/modules/artist/entities/artist.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Artist } from 'src/modules/artist/entities/artist.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('Album')
 export class Album {

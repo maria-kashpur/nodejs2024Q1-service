@@ -3,16 +3,12 @@ import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
 import appError from 'src/common/constants/errors';
-import { v4 as uuidv4 } from 'uuid';
-import db from 'src/db';
-import { EventEmitter2 } from 'eventemitter2';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class ArtistService {
   constructor(
-    private eventEmitter: EventEmitter2,
     @InjectRepository(Artist)
     private readonly artistRepository: Repository<Artist>,
   ) {}
@@ -22,7 +18,7 @@ export class ArtistService {
   }
 
   async findAll(): Promise<Artist[]> {
-    return await this.artistRepository.find()
+    return await this.artistRepository.find();
   }
 
   async findMany(ids: string[]): Promise<Artist[]> {
@@ -30,7 +26,7 @@ export class ArtistService {
   }
 
   async findOne(id: string): Promise<Artist> {
-    const searchArtist = await this.artistRepository.findOneBy({id});
+    const searchArtist = await this.artistRepository.findOneBy({ id });
     if (!searchArtist) {
       throw new NotFoundException(appError.ARTIST_ID_NOT_EXIST);
     }
@@ -51,7 +47,7 @@ export class ArtistService {
 
   async remove(id: string): Promise<void> {
     await this.findOne(id);
-    await this.artistRepository.delete(id)
+    await this.artistRepository.delete(id);
     //await this.eventEmitter.emitAsync('remove.artist', id);
   }
 }

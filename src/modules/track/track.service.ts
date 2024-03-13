@@ -3,8 +3,6 @@ import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
 import appError from 'src/common/constants/errors';
-import db from 'src/db';
-import { EventEmitter2 } from 'eventemitter2';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -13,7 +11,6 @@ export class TrackService {
   constructor(
     @InjectRepository(Track)
     private trackRepository: Repository<Track>,
-    private eventEmitter: EventEmitter2,
   ) {}
 
   async create(dto: CreateTrackDto): Promise<Track> {
@@ -50,25 +47,6 @@ export class TrackService {
 
   async remove(id: string): Promise<void> {
     await this.findOne(id);
-    await this.trackRepository.delete(id)
-   // await this.eventEmitter.emitAsync('remove.track', id);
+    await this.trackRepository.delete(id);
   }
-
-  // async removeArtistId(artistId: string): Promise<void> {
-  //   db.tracks = db.tracks.map((track) => {
-  //     if (track.artistId === artistId) {
-  //       track.artistId = null;
-  //     }
-  //     return track;
-  //   });
-  // }
-
-  // async removeAlbumId(albumId: string): Promise<void> {
-  //   db.tracks = db.tracks.map((track) => {
-  //     if (track.albumId === albumId) {
-  //       track.albumId = null;
-  //     }
-  //     return track;
-  //   });
-  // }
 }

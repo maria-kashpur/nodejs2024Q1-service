@@ -3,7 +3,7 @@ import {
   Injectable,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { Favorite } from './entities/fav.entity';
+import { Favorite, Favorites } from './entities/fav.entity';
 import { ArtistService } from '../artist/artist.service';
 import { AlbumService } from '../album/album.service';
 import { TrackService } from '../track/track.service';
@@ -13,12 +13,6 @@ import { Track } from '../track/entities/track.entity';
 import appError from 'src/common/constants/errors';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
-class Favorites {
-  artists: Artist[];
-  albums: Album[];
-  tracks: Track[];
-}
 
 @Injectable()
 export class FavsService {
