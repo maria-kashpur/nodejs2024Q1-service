@@ -7,43 +7,33 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import appError from 'src/common/constants/errors';
-import { v4 as uuidv4 } from 'uuid';
-import db from 'src/db';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
+
   async getUserByID(id: string): Promise<User> {
-    const searchUser = db.users.find((user) => user.id === id);
+    const searchUser = await this.userRepository.findOneBy({ id });
     if (!searchUser) {
       throw new NotFoundException(appError.USER_ID_NOT_EXIST);
     }
     return searchUser;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
-    const user: User = {
-      id: uuidv4(),
-      ...createUserDto,
-      version: 1,
-      createdAt: +new Date(),
-      updatedAt: +new Date(),
-    };
-    db.users.push(user);
-
-    const response = {
-      id: user.id,
-      login: user.login,
-      version: user.version,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
-    return response;
+  async create(dto: CreateUserDto): Promise<Omit<User, 'password'>> {
+    const createUser = await this.userRepository.save(dto);
+    delete createUser.password;
+    return createUser;
   }
 
   async findAll(): Promise<Omit<User, 'password'>[]> {
-    return db.users.map((user) => {
-      delete user.password;
-      return user;
+    return await this.userRepository.find({
+      select: ['id', 'login', 'version', 'createdAt', 'updatedAt'],
     });
   }
 
@@ -55,28 +45,25 @@ export class UserService {
 
   async update(
     id: string,
-    updateUserDto: UpdateUserDto,
+    dto: UpdateUserDto,
   ): Promise<Omit<User, 'password'>> {
     const searchUser = await this.getUserByID(id);
-    if (updateUserDto.oldPassword !== searchUser.password) {
+    if (dto.oldPassword !== searchUser.password) {
       throw new ForbiddenException(appError.UPDATE_USER_PASSWORD_INVALID);
     }
 
     const updatedUser = {
       ...searchUser,
-      password: updateUserDto.newPassword,
-      version: searchUser.version + 1,
-      updatedAt: +new Date(),
+      password: dto.newPassword,
     };
 
-    db.users = db.users.map((user) => (user.id === id ? updatedUser : user));
+    await this.userRepository.save(updatedUser);
 
-    const response = await this.findOne(id);
-    return response;
+    return await this.findOne(id);
   }
 
   async remove(id: string): Promise<void> {
     await this.getUserByID(id);
-    db.users = db.users.filter((user) => user.id !== id);
+    await this.userRepository.delete(id);
   }
 }
