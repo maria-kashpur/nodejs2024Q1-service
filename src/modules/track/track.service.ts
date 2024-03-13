@@ -3,33 +3,33 @@ import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
 import appError from 'src/common/constants/errors';
-import { v4 as uuidv4 } from 'uuid';
 import db from 'src/db';
 import { EventEmitter2 } from 'eventemitter2';
+import { In, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class TrackService {
-  constructor(private eventEmitter: EventEmitter2) {}
+  constructor(
+    @InjectRepository(Track)
+    private trackRepository: Repository<Track>,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
-  async create(createTrackDto: CreateTrackDto): Promise<Track> {
-    const track: Track = {
-      id: uuidv4(),
-      ...createTrackDto,
-    };
-    db.tracks.push(track);
-    return track;
+  async create(dto: CreateTrackDto): Promise<Track> {
+    return await this.trackRepository.save(dto);
   }
 
   async findMany(ids: string[]): Promise<Track[]> {
-    return db.tracks.filter((track) => ids.includes(track.id));
+    return await this.trackRepository.find({ where: { id: In(ids) } });
   }
 
   async findAll(): Promise<Track[]> {
-    return db.tracks;
+    return await this.trackRepository.find();
   }
 
   async findOne(id: string): Promise<Track> {
-    const searchTrack = db.tracks.find((track) => track.id === id);
+    const searchTrack = await this.trackRepository.findOneBy({ id });
     if (!searchTrack) {
       throw new NotFoundException(appError.TRACK_ID_NOT_EXIST);
     }
@@ -43,34 +43,32 @@ export class TrackService {
       ...updateTrackDto,
     };
 
-    db.tracks = db.tracks.map((track) =>
-      track.id === id ? updatedTrack : track,
-    );
+    await this.trackRepository.save(updatedTrack);
 
-    return updatedTrack;
+    return await this.findOne(id);
   }
 
   async remove(id: string): Promise<void> {
     await this.findOne(id);
-    db.tracks = db.tracks.filter((track) => track.id !== id);
-    await this.eventEmitter.emitAsync('remove.track', id);
+    await this.trackRepository.delete(id)
+   // await this.eventEmitter.emitAsync('remove.track', id);
   }
 
-  async removeArtistId(artistId: string): Promise<void> {
-    db.tracks = db.tracks.map((track) => {
-      if (track.artistId === artistId) {
-        track.artistId = null;
-      }
-      return track;
-    });
-  }
+  // async removeArtistId(artistId: string): Promise<void> {
+  //   db.tracks = db.tracks.map((track) => {
+  //     if (track.artistId === artistId) {
+  //       track.artistId = null;
+  //     }
+  //     return track;
+  //   });
+  // }
 
-  async removeAlbumId(albumId: string): Promise<void> {
-    db.tracks = db.tracks.map((track) => {
-      if (track.albumId === albumId) {
-        track.albumId = null;
-      }
-      return track;
-    });
-  }
+  // async removeAlbumId(albumId: string): Promise<void> {
+  //   db.tracks = db.tracks.map((track) => {
+  //     if (track.albumId === albumId) {
+  //       track.albumId = null;
+  //     }
+  //     return track;
+  //   });
+  // }
 }

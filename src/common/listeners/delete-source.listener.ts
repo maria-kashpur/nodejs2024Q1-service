@@ -12,21 +12,21 @@ export class DeleteSourceListener {
     private readonly favsService: FavsService,
   ) {}
 
-  @OnEvent('remove.track', { async: true })
-  async deleteTrack(id: string): Promise<void> {
-    await this.favsService.remove('track', id);
-  }
+  // @OnEvent('remove.track', { async: true })
+  // async deleteTrack(id: string): Promise<void> {
+  //   await this.favsService.remove('track', id);
+  // }
 
-  @OnEvent('remove.artist', { async: true })
-  async deleteArtist(id: string): Promise<void> {
-    await this.trackService.removeArtistId(id);
-    await this.albumService.removeArtistId(id);
-    await this.favsService.remove('artist', id);
-  }
+  // @OnEvent('remove.artist', { async: true })
+  // async deleteArtist(id: string): Promise<void> {
+  //   await this.trackService.removeArtistId(id);
+  //   await this.albumService.removeArtistId(id);
+  //   await this.favsService.remove('artist', id);
+  // }
 
-  @OnEvent('remove.album', { async: true })
-  async deleteAlbum(id: string): Promise<void> {
-    await this.trackService.removeAlbumId(id);
-    await this.favsService.remove('album', id);
-  }
+  // @OnEvent('remove.album', { async: true })
+  // async deleteAlbum(id: string): Promise<void> {
+  //   await this.trackService.removeAlbumId(id);
+  //   await this.favsService.remove('album', id);
+  // }
 }
