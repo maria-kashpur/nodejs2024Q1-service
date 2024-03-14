@@ -8,7 +8,7 @@ export default () => ({
 
   db_host: process.env.POSTGRES_HOST,
   db_port: +process.env.POSTGRES_PORT,
-  db_username: process.env.POSTGRES_USERNAME,
+  db_username: process.env.POSTGRES_USER,
   db_password: process.env.POSTGRES_PASSWORD,
-  db_database: process.env.POSTGRES_DATABASE,
+  db_database: process.env.POSTGRES_DB,
 });

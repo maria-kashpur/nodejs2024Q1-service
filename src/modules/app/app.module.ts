@@ -27,10 +27,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
         autoLoadEntities: true,
         synchronize: true,
-
-        // synchronize: false,
-        // migrations: [`${__dirname}/db/migrations/*{.ts,.js}`],
-        // migrationsRun: true,
       }),
     }),
     UserModule,
@@ -38,6 +34,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     ArtistModule,
     AlbumModule,
     FavsModule,
+
   ],
 })
 export class AppModule {}
