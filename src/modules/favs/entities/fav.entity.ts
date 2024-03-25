@@ -14,7 +14,7 @@ export class Favorite {
   })
   source: 'artist' | 'album' | 'track';
 
-  @Column()
+  @Column('uuid')
   sourceId: string;
 }
 
