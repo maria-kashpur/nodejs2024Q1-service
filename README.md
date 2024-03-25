@@ -1,29 +1,43 @@
 # Home Library Service
 
-This README file provides a brief overview of the Home Library Service project, including installation instructions, usage guidelines, and details about REST endpoints. 
+This project is a web service for managing users' home library. Users can add, view, update and delete information about artists, albums and tracks, as well as add them to their favorites list.
 
 ## Used Technologies
-* Node.js
-* Nest.js
+* NodeJS
+* NestJS
 * PostgreSQL
 * TypeORM
 * Docker
 * Jest
 
+## Техническая информация
+Приложение создано с использованием TypeScript.
+Для хранения данных используется PostgreSQL база данных.
+Для взаимодействия с базой данных используется TypeORM.
+Запросы и ответы имеют формат application/json.
+Валидация входящих запросов осуществляется.
+Для запуска сервиса используется Docker и Docker Compose.
+Сервис запускается в нескольких контейнерах: контейнер с приложением и контейнер с PostgreSQL базой данных.
 
 ## Prerequisites
 1. Clone this repository 
-```
-git clone {repository URL}
-```
 2. Rename .env.example to .env
 3. Install NPM modules
 ```
-npm install
+npm сi
 ```
 3. Run Docker
 ```
 npm run docker
+```
+
+## Scan images for security vulnerabilities
+```
+npm rum docker-scan:node
+```
+
+```
+npm rum docker-scan:db
 ```
 
 
@@ -45,7 +59,8 @@ npm run format
 
 ## OpenAPI documentation
 After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
+in your browser OpenAPI documentation
+For exaple: http://localhost:4000/doc/
 
 ## REST Endpoints
 ### Users
