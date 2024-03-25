@@ -6,7 +6,9 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "docker": "docker-compose up",
+    "docker": "docker-compose up --build",
+    "docker-scan:node": "docker scout cves --details local://home-library-service:node",
+    "docker-scan:db": "docker scout cves --details home-library-service:postgres",
     "docker-test": "docker exec node npm run test",
     "prebuild": "rimraf dist",
     "build": "nest build",
