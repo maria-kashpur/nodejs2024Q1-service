@@ -16,6 +16,8 @@ services:
       - postgres
     volumes:
       - ./src:/usr/app/src
+    networks:
+      - node-postgres-bridge
   postgres:
     container_name: postgres
     image: home-library-service:postgres
@@ -32,11 +34,13 @@ services:
     volumes:
         - db:/var/lib/postgresql/data
         - db-logs:/var/logs/postgresql
+    networks:
+      - node-postgres-bridge
 
 volumes:
   db:
   db-logs:
 
 networks:
-  defaut:
+  node-postgres-bridge:
     driver: bridge
